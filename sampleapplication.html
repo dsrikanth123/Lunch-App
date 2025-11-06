@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Company Lunch Token App</title>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <center>
+      <h1>🍽️ My Company Lunch Token App 🍽️</h1>
+      
+      <hr>
+    </center>
+  </header>
+
+  <center>
+
+  <!-- HOME PAGE -->
+  <div id="home">
+    <h2>🏠 Home Page</h2>
+    <p>Please select an option:</p>
+    <table border="1" cellpadding="10">
+      <tr>
+        <td><button onclick="showRegister()">1) Register Employee</button></td>
+      </tr>
+      <tr>
+        <td><button onclick="showLunchToken()">2) Lunch Token</button></td>
+      </tr>
+      <tr>
+        <td><button onclick="showTokenList()">3) Today Lunch Token List</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- REGISTER EMPLOYEE PAGE -->
+  <div id="registerPage" style="display:none;">
+    <fieldset>
+      <legend>📝 Register Employee</legend>
+      <form onsubmit="registerEmployee(); return false;">
+        <label>ID:</label><br>
+        <input type="text" id="empId"><br>
+        <label>Name:</label><br>
+        <input type="text" id="empName"><br>
+        <label>Department:</label><br>
+        <input type="text" id="empDept"><br><br>
+        <button type="submit">Save Employee</button>
+      </form>
+      <br>
+      <button onclick="goHome()">🏠 Back to Home</button>
+      <button onclick="printAllReg()">📄 Show Registered Employees</button>
+    </fieldset>
+    <hr>
+  </div>
+
+  <!-- LUNCH TOKEN PAGE -->
+  <div id="tokenPage" style="display:none;">
+    <fieldset>
+      <legend>🍱 Mark Lunch Token</legend>
+      <p>Enter Employee ID:</p>
+      <input type="text" id="tokenId">
+      <button onclick="markToken()">Submit Token</button>
+      <p id="tokenMsg"></p>
+      <br>
+      <button onclick="goHome()">🏠 Back to Home</button>
+    </fieldset>
+    <hr>
+  </div>
+
+  <!-- TODAY'S LUNCH TOKEN LIST PAGE -->
+  <div id="listPage" style="display:none;">
+    <fieldset>
+      <legend>📋 Today's Lunch Token List</legend>
+      <table border="1" cellpadding="8" id="tokenTable">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Date</th>
+          <th>Delete</th>
+        </tr>
+      </table>
+      <br>
+      <button onclick="printLunchList()">🖨️ Print List</button>
+      <button onclick="clearLunchTokens()">🧹 Clear Today's Tokens</button>
+      <br><br>
+      <button onclick="goHome()">🏠 Back to Home</button>
+    </fieldset>
+    <hr>
+  </div>
+
+  <!-- REGISTERED EMPLOYEES TABLE PAGE -->
+  <div id="showAllReg" style="display:none;">
+    <fieldset>
+      <legend>👥 Registered Employees</legend>
+      <table border="1" cellpadding="8" id="empTable">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Delete</th>
+        </tr>
+      </table>
+      <br>
+      <button onclick="goHome()">🏠 Back to Home</button>
+    </fieldset>
+    <hr>
+  </div>
+  
+  
+  
+
+  </center>
+  
+  
+  <!-- Advertisement at bottom -->
+  <!-- Advertisement at bottom -->
+<div id="adSection" style="text-align: center;">
+  <p>Advertisement</p>
+  <img src="ads2.webp" alt="Advertisement" style="width:600px; height:auto;">
+
+</div>
+
+
+
+  <!-- FOOTER -->
+  <footer>
+    <center>
+      <hr>
+      <p>© 2025 My Company. All rights reserved.</p>
+      <p>Designed for internal company use 🍴</p>
+    </center>
+  </footer>
+  
+  
+  
+  
+
+  <script>
+    // Load employees from localStorage
+    let employees = JSON.parse(localStorage.getItem("employees") || "[]");
+
+    function saveEmployees() {
+      localStorage.setItem("employees", JSON.stringify(employees));
+    }
+
+    // Navigation
+    function goHome() {
+      hideAll();
+      document.getElementById('home').style.display = 'block';
+    }
+
+    function hideAll() {
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('registerPage').style.display = 'none';
+      document.getElementById('tokenPage').style.display = 'none';
+      document.getElementById('listPage').style.display = 'none';
+      document.getElementById('showAllReg').style.display = 'none';
+    }
+
+    function showRegister() {
+      hideAll();
+      document.getElementById('registerPage').style.display = 'block';
+    }
+
+    function showLunchToken() {
+      hideAll();
+      document.getElementById('tokenPage').style.display = 'block';
+      document.getElementById('tokenMsg').textContent = '';
+      document.getElementById('tokenId').value = '';
+    }
+
+    function showTokenList() {
+      hideAll();
+      document.getElementById('listPage').style.display = 'block';
+      renderTokenTable();
+    }
+
+    function printAllReg() {
+      hideAll();
+      document.getElementById('showAllReg').style.display = 'block';
+      renderEmployeeTable();
+    }
+
+    // Register Employee
+    function registerEmployee() {
+      const id = document.getElementById('empId').value.trim();
+      const name = document.getElementById('empName').value.trim();
+      const dept = document.getElementById('empDept').value.trim();
+      if (id && name && dept) {
+        employees.push({ id, name, dept, lunch: false, date: "" });
+        saveEmployees();
+        alert("Employee Registered!");
+        document.getElementById('empId').value = '';
+        document.getElementById('empName').value = '';
+        document.getElementById('empDept').value = '';
+      } else {
+        alert("Please fill all fields.");
+      }
+    }
+
+    // Mark Lunch Token
+    function markToken() {
+      const id = document.getElementById('tokenId').value.trim();
+      const emp = employees.find(e => e.id === id);
+      const msg = document.getElementById('tokenMsg');
+      if (emp) {
+        const today = new Date().toLocaleDateString();
+        emp.lunch = true;
+        emp.date = today;
+        saveEmployees();
+        msg.textContent = `Lunch token marked for ${emp.name} on ${today}`;
+      } else {
+        msg.textContent = "Employee not found!";
+      }
+    }
+
+    // Delete Registered Employee (with password)
+    function deleteEmployee(id) {
+      const pwd = prompt("Enter password to delete this employee:");
+      if (pwd === "12345") {
+        if (confirm("Are you sure you want to delete this employee completely?")) {
+          employees = employees.filter(e => e.id !== id);
+          saveEmployees();
+          renderEmployeeTable();
+          renderTokenTable();
+        }
+      } else {
+        alert("Wrong password! Employee not deleted.");
+      }
+    }
+
+    // Delete Lunch Token (with password)
+    function deleteLunchToken(id) {
+      const pwd = prompt("Enter password to delete this lunch token:");
+      if (pwd === "12345") {
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+          emp.lunch = false;
+          emp.date = "";
+          saveEmployees();
+          renderTokenTable();
+        }
+      } else {
+        alert("Wrong password! Lunch token not deleted.");
+      }
+    }
+
+    // Render Lunch Token Table
+    function renderTokenTable() {
+      const table = document.getElementById('tokenTable');
+      table.innerHTML = `
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Date</th>
+          <th>Delete</th>
+        </tr>
+      `;
+      const filtered = employees.filter(e => e.lunch === true);
+      if (filtered.length === 0) {
+        const row = table.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 5;
+        cell.textContent = "No lunch tokens issued today.";
+      } else {
+        filtered.forEach(e => {
+          const row = table.insertRow();
+          row.insertCell().textContent = e.id;
+          row.insertCell().textContent = e.name;
+          row.insertCell().textContent = e.dept;
+          row.insertCell().textContent = e.date;
+          const delCell = row.insertCell();
+          const btn = document.createElement("button");
+          btn.textContent = "Delete";
+          btn.onclick = () => deleteLunchToken(e.id);
+          delCell.appendChild(btn);
+        });
+      }
+    }
+
+    // Render Registered Employees Table
+    function renderEmployeeTable() {
+      const table = document.getElementById('empTable');
+      table.innerHTML = `
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Delete</th>
+        </tr>
+      `;
+      if (employees.length === 0) {
+        const row = table.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 4;
+        cell.textContent = "No employees registered yet.";
+      } else {
+        employees.forEach(e => {
+          const row = table.insertRow();
+          row.insertCell().textContent = e.id;
+          row.insertCell().textContent = e.name;
+          row.insertCell().textContent = e.dept;
+          const delCell = row.insertCell();
+          const btn = document.createElement("button");
+          btn.textContent = "Delete";
+          btn.onclick = () => deleteEmployee(e.id);
+          delCell.appendChild(btn);
+        });
+      }
+    }
+
+    // Print Today's Lunch List
+    function printLunchList() {
+      const tokenListDiv = document.getElementById("listPage");
+      const originalContent = document.body.innerHTML;
+      document.body.innerHTML = tokenListDiv.innerHTML;
+      window.print();
+      document.body.innerHTML = originalContent;
+    }
+
+    // Clear Today's Lunch Tokens (with password)
+    function clearLunchTokens() {
+      const pwd = prompt("Enter password to clear today's lunch tokens:");
+      if (pwd === "12345") {
+        employees.forEach(e => {
+          e.lunch = false;
+          e.date = "";
+        });
+        saveEmployees();
+        renderTokenTable();
+        alert("Today's lunch tokens cleared successfully!");
+      } else {
+        alert("Wrong password!");
+      }
+    }
+
+  </script>
+
+</body>
+</html>
